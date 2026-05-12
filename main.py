@@ -61,10 +61,16 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 # RUN
-app = Application.builder().token(TOKEN).build()
+import asyncio
 
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CallbackQueryHandler(buttons))
+async def main():
+    app = Application.builder().token(TOKEN).build()
 
-print("Bot is running...")
-app.run_polling()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(buttons))
+
+    print("Bot is running...")
+    await app.run_polling()
+
+if __name__ == "__main__":
+    asyncio.run(main())
