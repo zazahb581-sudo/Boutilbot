@@ -1,7 +1,8 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
-TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU"
+import os
+TOKEN = os.environ.get("TOKEN")
 
 BANKILY_NUMBER = "34888115"
 SUPPORT_EMAIL = "zazahb581@gmail.com"
