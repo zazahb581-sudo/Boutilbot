@@ -9,8 +9,11 @@ from telegram.ext import (
     filters
 )
 
-TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU" 
+TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU"
 
+ADMIN_ID = 8649975859
+
+# ===== START =====
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
@@ -32,6 +35,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+# ===== BUTTONS =====
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     q = update.callback_query
@@ -70,10 +74,25 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Support: 34888115"
         )
 
+# ===== CHAT =====
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text.lower()
 
+    user = update.effective_user
+
+    # ===== SEND MESSAGE TO ADMIN =====
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=(
+            f"📩 New Message\n\n"
+            f"👤 User: @{user.username}\n"
+            f"🆔 ID: {user.id}\n\n"
+            f"💬 Message:\n{text}"
+        )
+    )
+
+    # ===== AUTO REPLIES =====
     if "hello" in text or "hi" in text:
 
         await update.message.reply_text(
@@ -116,13 +135,20 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Type /start"
         )
 
+# ===== MAIN =====
 def main():
 
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(buttons))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
+
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            handle_messages
+        )
+    )
 
     print("Bot started")
 
