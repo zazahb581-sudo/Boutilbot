@@ -9,7 +9,7 @@ from telegram.ext import (
     filters
 )
 
-TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU"
+TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU" 
 
 ADMIN_ID = 8649975859
 
@@ -73,6 +73,27 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.message.reply_text(
             "Support: 34888115"
         )
+
+# ===== PHOTO =====
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = update.effective_user
+
+    photo = update.message.photo[-1]
+
+    await context.bot.send_photo(
+        chat_id=ADMIN_ID,
+        photo=photo.file_id,
+        caption=(
+            f"📸 Payment Screenshot\n\n"
+            f"👤 User: @{user.username}\n"
+            f"🆔 ID: {user.id}"
+        )
+    )
+
+    await update.message.reply_text(
+        "✅ Screenshot received.\nSupport will review your payment."
+    )
 
 # ===== CHAT =====
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -147,6 +168,13 @@ def main():
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             handle_messages
+        )
+    )
+
+    app.add_handler(
+        MessageHandler(
+            filters.PHOTO,
+            handle_photo
         )
     )
 
