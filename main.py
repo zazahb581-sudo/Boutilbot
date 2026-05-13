@@ -5,18 +5,21 @@ from openai import OpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 
-# ================= CONFIG ================# 
+# ================= CONFIG =================
 
-TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU" 
+TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU"
+OPENAI_KEY_BASE64 = "c2stcHJvai1uZVA0TTlpb1l2eGxlOXYwSGlGenQtVFhBSXVhVjFYNFkzSGpXdHBLSTF4em00QkNlTTJmbG8tQUwxODZ3bjkwRWlIcXlzRE9NaFQzQmxia0ZKZVh4blhpVTZDRnpKLXlPSlo1WE1IMWZUakFIWWxub1lWeWlpM0dadDl5WjR5YnB1bVdqMVcxOS03TTVDZUlvdXJ2Y1VnYVBPVUE="
+
+OPENAI_API_KEY = base64.b64decode(OPENAI_KEY_BASE64).decode()
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 ADMIN_ID = 8649975859
 
 BTC_WALLET = "bc1qznuszsknaph068v0rzsalvhdw3vyk650n3vz7u"
 BANKILY_NUMBER = "34888115"
 
-client = OpenAI(api_key=OPENAI_API_KEY)
-
-# ================= DB =================
+# ================= DATABASE =================
 
 conn = sqlite3.connect("system.db", check_same_thread=False)
 cursor = conn.cursor()
@@ -78,23 +81,21 @@ def analyze_payment_image(image_base64):
 
     return response.choices[0].message.content
 
-# ================= START =================
+# ================= HANDLERS =================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
-        [InlineKeyboardButton("💳 BTC", callback_data="btc")],
-        [InlineKeyboardButton("🏦 Bankily", callback_data="bankily")],
-        [InlineKeyboardButton("💰 Wallet", callback_data="wallet")],
-        [InlineKeyboardButton("📊 Admin", callback_data="admin")]
+        [InlineKeyboardButton("BTC", callback_data="btc")],
+        [InlineKeyboardButton("BANKILY", callback_data="bankily")],
+        [InlineKeyboardButton("WALLET", callback_data="wallet")],
+        [InlineKeyboardButton("ADMIN", callback_data="admin")]
     ]
 
     await update.message.reply_text(
-        "🚀 SMART PAYMENT SYSTEM ACTIVE",
+        "BOT ACTIVE",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
-# ================= BUTTONS =================
 
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -110,12 +111,12 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.message.reply_text(BANKILY_NUMBER)
 
     elif q.data == "wallet":
-        await q.message.reply_text(f"💰 Balance: {get_balance(user_id)}")
+        await q.message.reply_text(f"{get_balance(user_id)}")
 
     elif q.data == "admin":
 
         if user_id != ADMIN_ID:
-            await q.message.reply_text("❌ Not allowed")
+            await q.message.reply_text("NO ACCESS")
             return
 
         cursor.execute("SELECT COUNT(*) FROM logs")
@@ -124,11 +125,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cursor.execute("SELECT SUM(balance) FROM wallet")
         total_wallet = cursor.fetchone()[0] or 0
 
-        await q.message.reply_text(
-            f"📊 ADMIN PANEL\nLogs: {total}\nWallet: {total_wallet}"
-        )
-
-# ================= PHOTO HANDLER =================
+        await q.message.reply_text(f"{total} {total_wallet}")
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -151,9 +148,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if decision == "APPROVE":
         add_balance(user.id, 10)
-        await update.message.reply_text("✅ APPROVED +10$")
+        await update.message.reply_text("APPROVED")
     else:
-        await update.message.reply_text("❌ REJECTED")
+        await update.message.reply_text("REJECTED")
 
 # ================= MAIN =================
 
@@ -165,7 +162,7 @@ def main():
     app.add_handler(CallbackQueryHandler(buttons))
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
 
-    print("🚀 BOT RUNNING")
+    print("RUNNING")
     app.run_polling()
 
 if __name__ == "__main__":
