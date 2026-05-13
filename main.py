@@ -40,7 +40,9 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
 
-    if q.data == "place_order":
+    data = q.data
+
+    if data == "place_order":
 
         order_id = random.randint(10000, 99999)
 
@@ -50,16 +52,16 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Send payment to: 34888115"
         )
 
-    elif q.data == "buy_usdt":
+    elif data == "buy_usdt":
         await q.message.reply_text("Use Place Order first.")
 
-    elif q.data == "buy_btc":
+    elif data == "buy_btc":
         await q.message.reply_text("Use Place Order first.")
 
-    elif q.data == "prices":
+    elif data == "prices":
         await q.message.reply_text("USDT: 1.05 USD")
 
-    elif q.data == "support":
+    elif data == "support":
         await q.message.reply_text("Support: 34888115")
 
 # ===== PHOTO =====
@@ -79,20 +81,25 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ===== CHAT =====
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    text = update.message.text.lower().strip()
+    text = (update.message.text or "").lower().strip()
     user = update.effective_user
 
-    # ❌ IMPORTANT FIX: ignore button-like text so it doesn't spam admin
-    if text in ["place order", "buy usdt", "buy btc", "prices", "support"]:
+    # ❌ ignore empty or weird inputs
+    if not text:
         return
 
-    # send to admin ONLY normal messages
+    # ❌ ignore button texts (IMPORTANT FIX)
+    button_words = ["place order", "buy usdt", "buy btc", "prices", "support"]
+    if text in button_words:
+        return
+
+    # send to admin ONLY real chat messages
     await context.bot.send_message(
         chat_id=ADMIN_ID,
-        text=f"User @{user.username}:\n{text}"
+        text=f"User @{user.username} ({user.id}):\n{text}"
     )
 
-    # simple smart replies
+    # ===== AUTO REPLIES =====
     if "hello" in text or "hi" in text:
         await update.message.reply_text("Hello 👋")
 
@@ -112,7 +119,6 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("مرحبا 👋")
 
     else:
-        # ❌ حذفنا رسالة Type /start (كانت مزعجة)
         await update.message.reply_text("How can I help you?")
 
 # ===== MAIN =====
