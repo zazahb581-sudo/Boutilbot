@@ -10,7 +10,7 @@ from telegram.ext import (
     filters
 )
 
-TOKEN = "os.environ.get("TOKEN")"
+TOKEN = "8171808465:AAHp6TccNjcBy3W2iBiA54j-0AJppmZUmJU"
 
 # ===== START =====
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
